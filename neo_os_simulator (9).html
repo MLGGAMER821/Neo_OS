@@ -1,0 +1,240 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neo OS Simulator</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+    }
+    #bootScreen {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background-color: black;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 10;
+    }
+    #loadingBar {
+      width: 300px;
+      height: 20px;
+      border: 2px solid white;
+      margin-top: 20px;
+    }
+    #loadingProgress {
+      height: 100%;
+      width: 0%;
+      background-color: white;
+    }
+    #lockScreen {
+      display: none;
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background-color: #222;
+      color: white;
+      text-align: center;
+      padding-top: 100px;
+      z-index: 9;
+    }
+    #desktop {
+      display: none;
+      width: 100%;
+      height: 100%;
+      background-image: url('https://via.placeholder.com/1920x1080?text=NeoOS+Wallpaper');
+      background-size: cover;
+      position: relative;
+    }
+    #taskbar {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: 40px;
+      background-color: black;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 10px;
+    }
+    #startMenu {
+      position: absolute;
+      bottom: 40px;
+      left: 10px;
+      width: 200px;
+      background-color: #333;
+      color: white;
+      display: none;
+      flex-direction: column;
+      padding: 10px;
+    }
+    #chromeIcon {
+      width: 50px;
+      height: 50px;
+      position: absolute;
+      top: 100px;
+      left: 100px;
+      cursor: pointer;
+    }
+    #chromeIcon img {
+      width: 100%;
+      height: 100%;
+    }
+    #browserWindow {
+      display: none;
+      position: absolute;
+      top: 150px;
+      left: 150px;
+      width: 600px;
+      height: 400px;
+      background-color: white;
+      border: 2px solid black;
+      z-index: 5;
+      flex-direction: column;
+      animation: fadeIn 0.5s ease-in-out;
+    }
+    #browserHeader {
+      background-color: #ccc;
+      padding: 5px;
+      cursor: move;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    #browserControls button {
+      margin-left: 5px;
+    }
+    #urlBar {
+      width: 100%;
+      padding: 5px;
+      box-sizing: border-box;
+    }
+    iframe {
+      flex: 1;
+      width: 100%;
+      border: none;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+  <div id="bootScreen">
+    <h1>Booting Neo OS...</h1>
+    <div id="loadingBar">
+      <div id="loadingProgress"></div>
+    </div>
+  </div>
+
+  <div id="lockScreen">
+    <h2 id="welcomeText">Welcome to Neo OS</h2>
+    <input type="color" id="bgColorPicker" value="#222">
+    <input type="text" id="customText" placeholder="Enter welcome text">
+    <button onclick="unlock()">Unlock</button>
+    <div id="clock"></div>
+    <div id="date"></div>
+  </div>
+
+  <div id="desktop">
+    <div id="chromeIcon" onclick="openBrowser()">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/8/87/Google_Chrome_icon_%282011%29.png" alt="Chrome">
+    </div>
+    <div id="taskbar">
+      <button onclick="toggleStartMenu()">Start</button>
+      <div id="liveClock"></div>
+    </div>
+    <div id="startMenu">
+      <div onclick="openBrowser()">Google Chrome</div>
+    </div>
+    <div id="browserWindow">
+      <div id="browserHeader">
+        <span>Google Chrome</span>
+        <div id="browserControls">
+          <button onclick="maximizeBrowser()">🗖</button>
+          <button onclick="minimizeBrowser()">🗕</button>
+          <button onclick="closeBrowser()">❌</button>
+        </div>
+      </div>
+      <input type="text" id="urlBar" placeholder="Enter URL" value="https://google.com/?igu=1">
+      <button onclick="loadURL()">Go</button>
+      <iframe id="browserFrame" src="https://google.com/?igu=1"></iframe>
+    </div>
+  </div>
+
+  <script>
+    let progress = 0;
+    const loading = setInterval(() => {
+      progress += 1;
+      document.getElementById('loadingProgress').style.width = progress + '%';
+      if (progress >= 100) {
+        clearInterval(loading);
+        document.getElementById('bootScreen').style.display = 'none';
+        document.getElementById('lockScreen').style.display = 'block';
+      }
+    }, 30);
+
+    function unlock() {
+      const bgColor = document.getElementById('bgColorPicker').value;
+      const customText = document.getElementById('customText').value;
+      document.getElementById('desktop').style.display = 'block';
+      document.getElementById('lockScreen').style.display = 'none';
+      document.getElementById('desktop').style.backgroundColor = bgColor;
+      document.getElementById('welcomeText').innerText = customText || 'Welcome to Neo OS';
+    }
+
+    function toggleStartMenu() {
+      const menu = document.getElementById('startMenu');
+      menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+    }
+
+    function openBrowser() {
+      const browser = document.getElementById('browserWindow');
+      browser.style.display = 'flex';
+    }
+
+    function closeBrowser() {
+      document.getElementById('browserWindow').style.display = 'none';
+    }
+
+    function maximizeBrowser() {
+      const browser = document.getElementById('browserWindow');
+      browser.style.top = '0';
+      browser.style.left = '0';
+      browser.style.width = '100%';
+      browser.style.height = '100%';
+    }
+
+    function minimizeBrowser() {
+      const browser = document.getElementById('browserWindow');
+      browser.style.display = 'none';
+    }
+
+    function loadURL() {
+      const url = document.getElementById('urlBar').value;
+      document.getElementById('browserFrame').src = url;
+    }
+
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('liveClock').innerText = now.toLocaleTimeString();
+      document.getElementById('clock').innerText = now.toLocaleTimeString();
+      document.getElementById('date').innerText = now.toDateString();
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+  </script>
+</body>
+</html>
